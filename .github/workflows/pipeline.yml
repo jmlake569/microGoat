@@ -91,7 +91,7 @@ jobs:
         cd scripts && chmod +x tmas_install.sh && ./tmas_install.sh
         export TMAS_API_KEY=${{ secrets.V1_API_KEY }}
         docker save ${{ env.FRONTEND_CONTAINER_NAME }}:${{ env.RELEASE }} > image.tar
-        tmas scan docker-archive:image.tar --malware --saveSBOM > result.json
+        tmas scan docker-archive:image.tar --M --V --saveSBOM > result.json
         mv SBOM_* SBOM.json
         echo "TMAS Scan Result"
         cat result.json
