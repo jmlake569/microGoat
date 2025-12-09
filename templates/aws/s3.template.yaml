@@ -138,16 +138,6 @@ Resources:
                   - 'logs:PutLogEvents'
                 Resource: "*"
 
-  InvokeLambdaCustomResource:
-    Type: "Custom::InvokeLambda"
-    DependsOn:
-      - "WareHousePolicy"
-    Properties:
-      ServiceToken: !GetAtt UploadObjectLambdaFunction.Arn
-      ObjectKey: "BORING_PAPER_REQUEST_FORM.pdf"
-      SourceUrl: "https://immersionday-workshops-trendmicro.s3.amazonaws.com/boringpaperco/bucketfiles/BORING_PAPER_REQUEST_FORM.pdf"
-      DependsOn: UploadObjectLambdaFunction 
-
 Outputs:
   BoringPaperCoBucket:
     Description: Boring Paper Company WareHouse Orders Bucket
