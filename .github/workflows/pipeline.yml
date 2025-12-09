@@ -99,6 +99,10 @@ jobs:
           path: scripts/SBOM.json
           retention-days: 30
 
+      - name: Re-login to Amazon ECR
+        id: relogin-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Tag the Docker Image
         run: docker tag ${{ env.FRONTEND_CONTAINER_NAME }}:${{ env.RELEASE }} ${{ secrets.ECR }}/${{ env.FRONTEND_CONTAINER_NAME }}:${{ env.RELEASE }}
 
@@ -151,6 +155,10 @@ jobs:
           name: sbom-${{ env.BACKEND_CONTAINER_NAME }}
           path: scripts/SBOM.json
           retention-days: 30
+
+      - name: Re-login to Amazon ECR
+        id: relogin-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Tag the Docker Image
         run: docker tag ${{ env.BACKEND_CONTAINER_NAME }}:${{ env.RELEASE }} ${{ secrets.ECR }}/${{ env.BACKEND_CONTAINER_NAME }}:${{ env.RELEASE }}
@@ -205,6 +213,10 @@ jobs:
           path: scripts/SBOM.json
           retention-days: 30
 
+      - name: Re-login to Amazon ECR
+        id: relogin-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Tag the Docker Image
         run: docker tag ${{ env.TERMINAL_CONTAINER_NAME }}:${{ env.RELEASE }} ${{ secrets.ECR }}/${{ env.TERMINAL_CONTAINER_NAME }}:${{ env.RELEASE }}
 
@@ -258,6 +270,10 @@ jobs:
           path: scripts/SBOM.json
           retention-days: 30
 
+      - name: Re-login to Amazon ECR
+        id: relogin-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Tag the Docker Image
         run: docker tag ${{ env.LAZYMODE_CONTAINER_NAME }}:${{ env.RELEASE }} ${{ secrets.ECR }}/${{ env.LAZYMODE_CONTAINER_NAME }}:${{ env.RELEASE }}
 
@@ -310,6 +326,10 @@ jobs:
           name: sbom-${{ env.ORDERS_CONTAINER_NAME }}
           path: scripts/SBOM.json
           retention-days: 30
+
+      - name: Re-login to Amazon ECR
+        id: relogin-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Tag the Docker Image
         run: docker tag ${{ env.ORDERS_CONTAINER_NAME }}:${{ env.RELEASE }} ${{ secrets.ECR }}/${{ env.ORDERS_CONTAINER_NAME }}:${{ env.RELEASE }}
