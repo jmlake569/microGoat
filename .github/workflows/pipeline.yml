@@ -12,7 +12,7 @@ env:
   TERMINAL_CONTAINER_NAME: "terminal"
   LAZYMODE_CONTAINER_NAME: "lazymode"
   ORDERS_CONTAINER_NAME: "orders"
-  AWS_DEFAULT_REGION: "us-east-1"
+  AWS_DEFAULT_REGION: "us-west-2"
   CFN_TEMPLATES_FOLDER: "templates/aws"
   RELEASE: "latest"
   STACK_NAME: "boringpaperco"
@@ -107,6 +107,11 @@ jobs:
           echo "registry=${REGISTRY}" >> $GITHUB_OUTPUT
           echo "ECR Registry: ${REGISTRY}"
 
+      - name: Ensure ECR Repository Exists
+        run: |
+          aws ecr describe-repositories --repository-names ${{ env.FRONTEND_CONTAINER_NAME }} --region ${{ env.AWS_DEFAULT_REGION }} || \
+          aws ecr create-repository --repository-name ${{ env.FRONTEND_CONTAINER_NAME }} --region ${{ env.AWS_DEFAULT_REGION }}
+
       - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ steps.ecr-registry.outputs.registry }}
@@ -171,6 +176,11 @@ jobs:
           REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
           echo "registry=${REGISTRY}" >> $GITHUB_OUTPUT
           echo "ECR Registry: ${REGISTRY}"
+
+      - name: Ensure ECR Repository Exists
+        run: |
+          aws ecr describe-repositories --repository-names ${{ env.BACKEND_CONTAINER_NAME }} --region ${{ env.AWS_DEFAULT_REGION }} || \
+          aws ecr create-repository --repository-name ${{ env.BACKEND_CONTAINER_NAME }} --region ${{ env.AWS_DEFAULT_REGION }}
 
       - name: Login to Amazon ECR
         run: |
@@ -237,6 +247,11 @@ jobs:
           echo "registry=${REGISTRY}" >> $GITHUB_OUTPUT
           echo "ECR Registry: ${REGISTRY}"
 
+      - name: Ensure ECR Repository Exists
+        run: |
+          aws ecr describe-repositories --repository-names ${{ env.TERMINAL_CONTAINER_NAME }} --region ${{ env.AWS_DEFAULT_REGION }} || \
+          aws ecr create-repository --repository-name ${{ env.TERMINAL_CONTAINER_NAME }} --region ${{ env.AWS_DEFAULT_REGION }}
+
       - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ steps.ecr-registry.outputs.registry }}
@@ -302,6 +317,11 @@ jobs:
           echo "registry=${REGISTRY}" >> $GITHUB_OUTPUT
           echo "ECR Registry: ${REGISTRY}"
 
+      - name: Ensure ECR Repository Exists
+        run: |
+          aws ecr describe-repositories --repository-names ${{ env.LAZYMODE_CONTAINER_NAME }} --region ${{ env.AWS_DEFAULT_REGION }} || \
+          aws ecr create-repository --repository-name ${{ env.LAZYMODE_CONTAINER_NAME }} --region ${{ env.AWS_DEFAULT_REGION }}
+
       - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ steps.ecr-registry.outputs.registry }}
@@ -366,6 +386,11 @@ jobs:
           REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
           echo "registry=${REGISTRY}" >> $GITHUB_OUTPUT
           echo "ECR Registry: ${REGISTRY}"
+
+      - name: Ensure ECR Repository Exists
+        run: |
+          aws ecr describe-repositories --repository-names ${{ env.ORDERS_CONTAINER_NAME }} --region ${{ env.AWS_DEFAULT_REGION }} || \
+          aws ecr create-repository --repository-name ${{ env.ORDERS_CONTAINER_NAME }} --region ${{ env.AWS_DEFAULT_REGION }}
 
       - name: Login to Amazon ECR
         run: |
