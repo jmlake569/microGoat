@@ -474,38 +474,9 @@ jobs:
           echo "registry=${REGISTRY}" >> $GITHUB_OUTPUT
           echo "ECR Registry: ${REGISTRY}"
 
-      - name: Setup S3 Bucket for Templates
-        id: setup-s3
-        run: |
-          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          BUCKET_NAME="cfn-templates-${ACCOUNT_ID}-${AWS_DEFAULT_REGION}"
-          echo "bucket=${BUCKET_NAME}" >> $GITHUB_OUTPUT
-          
-          # Check if bucket exists, create if it doesn't
-          if aws s3api head-bucket --bucket "${BUCKET_NAME}" 2>/dev/null; then
-            echo "Bucket ${BUCKET_NAME} already exists"
-          else
-            echo "Creating bucket ${BUCKET_NAME} in ${AWS_DEFAULT_REGION}"
-            if [ "${AWS_DEFAULT_REGION}" = "us-east-1" ]; then
-              aws s3api create-bucket --bucket "${BUCKET_NAME}" --region "${AWS_DEFAULT_REGION}"
-            else
-              aws s3api create-bucket --bucket "${BUCKET_NAME}" --region "${AWS_DEFAULT_REGION}" --create-bucket-configuration LocationConstraint="${AWS_DEFAULT_REGION}"
-            fi
-            echo "Created bucket ${BUCKET_NAME}"
-          fi
-
-      - name: Upload CloudFormation Templates to S3
-        run: |
-          BUCKET=${{ steps.setup-s3.outputs.bucket }}
-          aws s3 cp templates/aws/lambda.template.yaml "s3://${BUCKET}/templates/lambda.template.yaml"
-          aws s3 cp templates/aws/s3.template.yaml "s3://${BUCKET}/templates/s3.template.yaml"
-          aws s3 cp templates/aws/vpc.template.yaml "s3://${BUCKET}/templates/vpc.template.yaml"
-          aws s3 cp templates/aws/ecs.template.yaml "s3://${BUCKET}/templates/ecs.template.yaml"
-          echo "Templates uploaded to s3://${BUCKET}/templates/"
-
       - name: Update Main Template with S3 URLs
         run: |
-          BUCKET=${{ steps.setup-s3.outputs.bucket }}
+          BUCKET="${{ secrets.CFN_TEMPLATES_BUCKET }}"
           REGION=${{ env.AWS_DEFAULT_REGION }}
           S3_BASE_URL="https://${BUCKET}.s3.${REGION}.amazonaws.com"
           
