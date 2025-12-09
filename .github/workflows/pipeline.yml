@@ -12,11 +12,12 @@ env:
   TERMINAL_CONTAINER_NAME: "terminal"
   LAZYMODE_CONTAINER_NAME: "lazymode"
   ORDERS_CONTAINER_NAME: "orders"
-  AWS_DEFAULT_REGION: "us-west-2"
+  AWS_DEFAULT_REGION: "us-east-2"
   CFN_TEMPLATES_FOLDER: "templates/aws"
   RELEASE: "latest"
   STACK_NAME: "boringpaperco"
   AMAAS_URL: "antimalware.us-1.cloudone.trendmicro.com:443"
+  CFN_TEMPLATES_REGION: "us-west-2"
 
 permissions:
   id-token: write   # This is required for requesting the JWT
@@ -477,8 +478,8 @@ jobs:
       - name: Update Main Template with S3 URLs
         run: |
           BUCKET="${{ secrets.CFN_TEMPLATES_BUCKET }}"
-          REGION=${{ env.AWS_DEFAULT_REGION }}
-          S3_BASE_URL="https://${BUCKET}.s3.${REGION}.amazonaws.com"
+          BUCKET_REGION=${{ env.CFN_TEMPLATES_REGION }}
+          S3_BASE_URL="https://${BUCKET}.s3.${BUCKET_REGION}.amazonaws.com"
           
           # Create a temporary modified main template
           sed -e "s|https://immersionday-workshops-trendmicro.s3.amazonaws.com/boringpaperco/templates/lambda.template.yaml|${S3_BASE_URL}/templates/lambda.template.yaml|g" \
