@@ -38,7 +38,7 @@ Resources:
       Environment:
         Variables:
           BUCKET_NAME: !Ref WareHouseOrders
-      Runtime: python3.8
+      Runtime: python3.12
       Timeout: 60
       Code:
         ZipFile: |

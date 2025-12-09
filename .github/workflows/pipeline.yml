@@ -99,15 +99,23 @@ jobs:
           path: scripts/SBOM.json
           retention-days: 30
 
+      - name: Get ECR Registry
+        id: ecr-registry
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+          echo "registry=${REGISTRY}" >> $GITHUB_OUTPUT
+          echo "ECR Registry: ${REGISTRY}"
+
       - name: Login to Amazon ECR
         run: |
-          aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR }}
+          aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ steps.ecr-registry.outputs.registry }}
 
       - name: Tag the Docker Image
-        run: docker tag ${{ env.FRONTEND_CONTAINER_NAME }}:${{ env.RELEASE }} ${{ secrets.ECR }}/${{ env.FRONTEND_CONTAINER_NAME }}:${{ env.RELEASE }}
+        run: docker tag ${{ env.FRONTEND_CONTAINER_NAME }}:${{ env.RELEASE }} ${{ steps.ecr-registry.outputs.registry }}/${{ env.FRONTEND_CONTAINER_NAME }}:${{ env.RELEASE }}
 
       - name: Push to ECR
-        run: docker push ${{ secrets.ECR }}/${{ env.FRONTEND_CONTAINER_NAME }}:${{ env.RELEASE }}
+        run: docker push ${{ steps.ecr-registry.outputs.registry }}/${{ env.FRONTEND_CONTAINER_NAME }}:${{ env.RELEASE }}
 
   # ───────────────────────────── BACKEND ──────────────────────────────
   Backend:
@@ -156,15 +164,23 @@ jobs:
           path: scripts/SBOM.json
           retention-days: 30
 
+      - name: Get ECR Registry
+        id: ecr-registry
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+          echo "registry=${REGISTRY}" >> $GITHUB_OUTPUT
+          echo "ECR Registry: ${REGISTRY}"
+
       - name: Login to Amazon ECR
         run: |
-          aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR }}
+          aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ steps.ecr-registry.outputs.registry }}
 
       - name: Tag the Docker Image
-        run: docker tag ${{ env.BACKEND_CONTAINER_NAME }}:${{ env.RELEASE }} ${{ secrets.ECR }}/${{ env.BACKEND_CONTAINER_NAME }}:${{ env.RELEASE }}
+        run: docker tag ${{ env.BACKEND_CONTAINER_NAME }}:${{ env.RELEASE }} ${{ steps.ecr-registry.outputs.registry }}/${{ env.BACKEND_CONTAINER_NAME }}:${{ env.RELEASE }}
 
       - name: Push to ECR
-        run: docker push ${{ secrets.ECR }}/${{ env.BACKEND_CONTAINER_NAME }}:${{ env.RELEASE }}
+        run: docker push ${{ steps.ecr-registry.outputs.registry }}/${{ env.BACKEND_CONTAINER_NAME }}:${{ env.RELEASE }}
 
   # ───────────────────────────── TERMINAL ──────────────────────────────
   Terminal:
@@ -213,15 +229,23 @@ jobs:
           path: scripts/SBOM.json
           retention-days: 30
 
+      - name: Get ECR Registry
+        id: ecr-registry
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+          echo "registry=${REGISTRY}" >> $GITHUB_OUTPUT
+          echo "ECR Registry: ${REGISTRY}"
+
       - name: Login to Amazon ECR
         run: |
-          aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR }}
+          aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ steps.ecr-registry.outputs.registry }}
 
       - name: Tag the Docker Image
-        run: docker tag ${{ env.TERMINAL_CONTAINER_NAME }}:${{ env.RELEASE }} ${{ secrets.ECR }}/${{ env.TERMINAL_CONTAINER_NAME }}:${{ env.RELEASE }}
+        run: docker tag ${{ env.TERMINAL_CONTAINER_NAME }}:${{ env.RELEASE }} ${{ steps.ecr-registry.outputs.registry }}/${{ env.TERMINAL_CONTAINER_NAME }}:${{ env.RELEASE }}
 
       - name: Push to ECR
-        run: docker push ${{ secrets.ECR }}/${{ env.TERMINAL_CONTAINER_NAME }}:${{ env.RELEASE }}
+        run: docker push ${{ steps.ecr-registry.outputs.registry }}/${{ env.TERMINAL_CONTAINER_NAME }}:${{ env.RELEASE }}
 
   # ───────────────────────────── LAZYMODE ──────────────────────────────
   LazyMode:
@@ -270,15 +294,23 @@ jobs:
           path: scripts/SBOM.json
           retention-days: 30
 
+      - name: Get ECR Registry
+        id: ecr-registry
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+          echo "registry=${REGISTRY}" >> $GITHUB_OUTPUT
+          echo "ECR Registry: ${REGISTRY}"
+
       - name: Login to Amazon ECR
         run: |
-          aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR }}
+          aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ steps.ecr-registry.outputs.registry }}
 
       - name: Tag the Docker Image
-        run: docker tag ${{ env.LAZYMODE_CONTAINER_NAME }}:${{ env.RELEASE }} ${{ secrets.ECR }}/${{ env.LAZYMODE_CONTAINER_NAME }}:${{ env.RELEASE }}
+        run: docker tag ${{ env.LAZYMODE_CONTAINER_NAME }}:${{ env.RELEASE }} ${{ steps.ecr-registry.outputs.registry }}/${{ env.LAZYMODE_CONTAINER_NAME }}:${{ env.RELEASE }}
 
       - name: Push to ECR
-        run: docker push ${{ secrets.ECR }}/${{ env.LAZYMODE_CONTAINER_NAME }}:${{ env.RELEASE }}
+        run: docker push ${{ steps.ecr-registry.outputs.registry }}/${{ env.LAZYMODE_CONTAINER_NAME }}:${{ env.RELEASE }}
 
   # ───────────────────────────── ORDERS ──────────────────────────────
   Orders:
@@ -327,15 +359,23 @@ jobs:
           path: scripts/SBOM.json
           retention-days: 30
 
+      - name: Get ECR Registry
+        id: ecr-registry
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+          echo "registry=${REGISTRY}" >> $GITHUB_OUTPUT
+          echo "ECR Registry: ${REGISTRY}"
+
       - name: Login to Amazon ECR
         run: |
-          aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR }}
+          aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ steps.ecr-registry.outputs.registry }}
 
       - name: Tag the Docker Image
-        run: docker tag ${{ env.ORDERS_CONTAINER_NAME }}:${{ env.RELEASE }} ${{ secrets.ECR }}/${{ env.ORDERS_CONTAINER_NAME }}:${{ env.RELEASE }}
+        run: docker tag ${{ env.ORDERS_CONTAINER_NAME }}:${{ env.RELEASE }} ${{ steps.ecr-registry.outputs.registry }}/${{ env.ORDERS_CONTAINER_NAME }}:${{ env.RELEASE }}
 
       - name: Push to ECR
-        run: docker push ${{ secrets.ECR }}/${{ env.ORDERS_CONTAINER_NAME }}:${{ env.RELEASE }}
+        run: docker push ${{ steps.ecr-registry.outputs.registry }}/${{ env.ORDERS_CONTAINER_NAME }}:${{ env.RELEASE }}
 
   # ───────────────────────── UNIT TESTS & DEPLOY ───────────────────────
   UnitTestsFrontend:
@@ -401,6 +441,14 @@ jobs:
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
+      - name: Get ECR Registry
+        id: ecr-registry
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+          echo "registry=${REGISTRY}" >> $GITHUB_OUTPUT
+          echo "ECR Registry: ${REGISTRY}"
+
       - name: Deploy CFN Stack
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
@@ -409,11 +457,11 @@ jobs:
           capabilities: CAPABILITY_IAM
           no-fail-on-empty-changeset: "1"
           parameter-overrides: >-
-            FrontendImage=${{ secrets.ECR }}/${{ env.FRONTEND_CONTAINER_NAME }}:${{ env.RELEASE }},
-            BackendImage=${{ secrets.ECR }}/${{ env.BACKEND_CONTAINER_NAME }}:${{ env.RELEASE }},
-            TerminalImage=${{ secrets.ECR }}/${{ env.TERMINAL_CONTAINER_NAME }}:${{ env.RELEASE }},
-            LazyModeImage=${{ secrets.ECR }}/${{ env.LAZYMODE_CONTAINER_NAME }}:${{ env.RELEASE }},
-            OrdersImage=${{ secrets.ECR }}/${{ env.ORDERS_CONTAINER_NAME }}:${{ env.RELEASE }},
+            FrontendImage=${{ steps.ecr-registry.outputs.registry }}/${{ env.FRONTEND_CONTAINER_NAME }}:${{ env.RELEASE }},
+            BackendImage=${{ steps.ecr-registry.outputs.registry }}/${{ env.BACKEND_CONTAINER_NAME }}:${{ env.RELEASE }},
+            TerminalImage=${{ steps.ecr-registry.outputs.registry }}/${{ env.TERMINAL_CONTAINER_NAME }}:${{ env.RELEASE }},
+            LazyModeImage=${{ steps.ecr-registry.outputs.registry }}/${{ env.LAZYMODE_CONTAINER_NAME }}:${{ env.RELEASE }},
+            OrdersImage=${{ steps.ecr-registry.outputs.registry }}/${{ env.ORDERS_CONTAINER_NAME }}:${{ env.RELEASE }},
             AmaasURL=${{ env.AMAAS_URL }},
             APIKey=${{ secrets.V1_API_KEY }},
             MyIP=${{ secrets.IP_ADDRESS }},
