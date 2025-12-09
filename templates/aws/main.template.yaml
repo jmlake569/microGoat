@@ -60,11 +60,6 @@ Parameters:
             - DISABLED
 
 Resources:
-  ServerlessStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: https://immersionday-workshops-trendmicro.s3.amazonaws.com/boringpaperco/templates/lambda.template.yaml
-  
   WareHouseStack:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -93,16 +88,11 @@ Resources:
         PrivateSubnetTwo: !GetAtt VPCNetworkStack.Outputs.PrivateSubnet2
         APIKey: !Ref APIKey
         AmaasURL: !Ref AmaasURL
-        APIGatewayURL: !GetAtt ServerlessStack.Outputs.VulnAPIEndpointURL
         MyIP: !Ref MyIP
         LaunchType: !Ref LaunchType
         PublicIP: !Ref PublicIP
         
 Outputs:
-  VulnerableAPIEndpoint:
-    Description: Vulnerable API ENDPOINT
-    Value: !GetAtt ServerlessStack.Outputs.VulnAPIEndpointURL
-  
   VpcId:
     Description: The VPC ID
     Value: !GetAtt VPCNetworkStack.Outputs.VpcId

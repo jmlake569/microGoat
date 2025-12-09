@@ -482,8 +482,7 @@ jobs:
           S3_BASE_URL="https://${BUCKET}.s3.${BUCKET_REGION}.amazonaws.com"
           
           # Create a temporary modified main template
-          sed -e "s|https://immersionday-workshops-trendmicro.s3.amazonaws.com/boringpaperco/templates/lambda.template.yaml|${S3_BASE_URL}/templates/lambda.template.yaml|g" \
-              -e "s|https://immersionday-workshops-trendmicro.s3.amazonaws.com/boringpaperco/templates/s3.template.yaml|${S3_BASE_URL}/templates/s3.template.yaml|g" \
+          sed -e "s|https://immersionday-workshops-trendmicro.s3.amazonaws.com/boringpaperco/templates/s3.template.yaml|${S3_BASE_URL}/templates/s3.template.yaml|g" \
               -e "s|https://immersionday-workshops-trendmicro.s3.amazonaws.com/boringpaperco/templates/vpc.template.yaml|${S3_BASE_URL}/templates/vpc.template.yaml|g" \
               -e "s|https://immersionday-workshops-trendmicro.s3.amazonaws.com/boringpaperco/templates/ecs.template.yaml|${S3_BASE_URL}/templates/ecs.template.yaml|g" \
               templates/aws/main.template.yaml > templates/aws/main.template.updated.yaml
