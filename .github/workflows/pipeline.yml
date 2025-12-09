@@ -474,11 +474,57 @@ jobs:
           echo "registry=${REGISTRY}" >> $GITHUB_OUTPUT
           echo "ECR Registry: ${REGISTRY}"
 
+      - name: Setup S3 Bucket for Templates
+        id: setup-s3
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          BUCKET_NAME="cfn-templates-${ACCOUNT_ID}-${AWS_DEFAULT_REGION}"
+          echo "bucket=${BUCKET_NAME}" >> $GITHUB_OUTPUT
+          
+          # Check if bucket exists, create if it doesn't
+          if aws s3api head-bucket --bucket "${BUCKET_NAME}" 2>/dev/null; then
+            echo "Bucket ${BUCKET_NAME} already exists"
+          else
+            echo "Creating bucket ${BUCKET_NAME} in ${AWS_DEFAULT_REGION}"
+            if [ "${AWS_DEFAULT_REGION}" = "us-east-1" ]; then
+              aws s3api create-bucket --bucket "${BUCKET_NAME}" --region "${AWS_DEFAULT_REGION}"
+            else
+              aws s3api create-bucket --bucket "${BUCKET_NAME}" --region "${AWS_DEFAULT_REGION}" --create-bucket-configuration LocationConstraint="${AWS_DEFAULT_REGION}"
+            fi
+            echo "Created bucket ${BUCKET_NAME}"
+          fi
+
+      - name: Upload CloudFormation Templates to S3
+        run: |
+          BUCKET=${{ steps.setup-s3.outputs.bucket }}
+          aws s3 cp templates/aws/lambda.template.yaml "s3://${BUCKET}/templates/lambda.template.yaml"
+          aws s3 cp templates/aws/s3.template.yaml "s3://${BUCKET}/templates/s3.template.yaml"
+          aws s3 cp templates/aws/vpc.template.yaml "s3://${BUCKET}/templates/vpc.template.yaml"
+          aws s3 cp templates/aws/ecs.template.yaml "s3://${BUCKET}/templates/ecs.template.yaml"
+          echo "Templates uploaded to s3://${BUCKET}/templates/"
+
+      - name: Update Main Template with S3 URLs
+        run: |
+          BUCKET=${{ steps.setup-s3.outputs.bucket }}
+          REGION=${{ env.AWS_DEFAULT_REGION }}
+          S3_BASE_URL="https://${BUCKET}.s3.${REGION}.amazonaws.com"
+          
+          # Create a temporary modified main template
+          sed -e "s|https://immersionday-workshops-trendmicro.s3.amazonaws.com/boringpaperco/templates/lambda.template.yaml|${S3_BASE_URL}/templates/lambda.template.yaml|g" \
+              -e "s|https://immersionday-workshops-trendmicro.s3.amazonaws.com/boringpaperco/templates/s3.template.yaml|${S3_BASE_URL}/templates/s3.template.yaml|g" \
+              -e "s|https://immersionday-workshops-trendmicro.s3.amazonaws.com/boringpaperco/templates/vpc.template.yaml|${S3_BASE_URL}/templates/vpc.template.yaml|g" \
+              -e "s|https://immersionday-workshops-trendmicro.s3.amazonaws.com/boringpaperco/templates/ecs.template.yaml|${S3_BASE_URL}/templates/ecs.template.yaml|g" \
+              templates/aws/main.template.yaml > templates/aws/main.template.updated.yaml
+          
+          echo "Updated template created: templates/aws/main.template.updated.yaml"
+
       - name: Deploy CFN Stack
+        id: deploy-cfn
         uses: aws-actions/aws-cloudformation-github-deploy@v1
+        continue-on-error: true
         with:
           name: ${{ env.STACK_NAME }}
-          template: templates/aws/main.template.yaml
+          template: templates/aws/main.template.updated.yaml
           capabilities: CAPABILITY_IAM
           no-fail-on-empty-changeset: "1"
           parameter-overrides: >-
@@ -491,3 +537,37 @@ jobs:
             APIKey=${{ secrets.V1_API_KEY }},
             MyIP=${{ secrets.IP_ADDRESS }},
             LaunchType=${{ secrets.LAUNCH_TYPE }}
+
+      - name: Show Stack Events on Failure
+        if: steps.deploy-cfn.outcome == 'failure' || steps.deploy-cfn.outcome == 'cancelled'
+        run: |
+          echo "=== Main Stack Events (last 30) ==="
+          aws cloudformation describe-stack-events \
+            --stack-name ${{ env.STACK_NAME }} \
+            --region ${{ env.AWS_DEFAULT_REGION }} \
+            --max-items 30 \
+            --query 'StackEvents[*].[Timestamp,ResourceStatus,ResourceType,LogicalResourceId,ResourceStatusReason]' \
+            --output table || true
+          
+          echo ""
+          echo "=== Nested Stack Events ==="
+          NESTED_STACKS=$(aws cloudformation list-stacks \
+            --region ${{ env.AWS_DEFAULT_REGION }} \
+            --stack-status-filter CREATE_FAILED UPDATE_FAILED ROLLBACK_COMPLETE CREATE_IN_PROGRESS \
+            --query "StackSummaries[?contains(StackName, '${{ env.STACK_NAME }}')].StackName" \
+            --output text 2>/dev/null || echo "")
+          
+          if [ -n "$NESTED_STACKS" ]; then
+            for nested_stack in $NESTED_STACKS; do
+              echo ""
+              echo "--- Failed Events for $nested_stack ---"
+              aws cloudformation describe-stack-events \
+                --stack-name "$nested_stack" \
+                --region ${{ env.AWS_DEFAULT_REGION }} \
+                --max-items 15 \
+                --query 'StackEvents[?ResourceStatus==`CREATE_FAILED` || ResourceStatus==`UPDATE_FAILED` || ResourceStatus==`ROLLBACK_IN_PROGRESS`].[Timestamp,ResourceStatus,ResourceType,LogicalResourceId,ResourceStatusReason]' \
+                --output table || true
+            done
+          fi
+          
+          exit 1
