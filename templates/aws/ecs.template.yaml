@@ -153,6 +153,19 @@ Resources:
                 Resource: 
                   - !Sub "arn:aws:s3:::${WareHouseBucket}/*"
                   - !Sub "arn:aws:s3:::${WareHouseBucket}"
+        # Trend Vision One Container Security - required for Runtime Security on Fargate
+        - PolicyName: TrendV1ContainerSecurityPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action: ssm:GetParameter
+                Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/V1CS/*"
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/V1CS/${BoringPaperCoCluster}/AuthToken-*"
+              - Effect: Allow
+                Action: ecs:TagResource
+                Resource: !Sub "arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task/*"
 
   LazyModeService: 
     Type: AWS::ECS::Service
@@ -177,6 +190,7 @@ Resources:
             - !If [IsEC2LaunchType, "EC2", "FARGATE"]
         NetworkMode: awsvpc
         ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+        TaskRoleArn: !GetAtt ECSTaskRole.Arn
         Cpu: 512
         Memory: 1024
         ContainerDefinitions:
@@ -373,6 +387,7 @@ Resources:
             - !If [IsEC2LaunchType, "EC2", "FARGATE"]
         NetworkMode: awsvpc
         ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+        TaskRoleArn: !GetAtt ECSTaskRole.Arn
         Cpu: 512
         Memory: 1024
         ContainerDefinitions:
