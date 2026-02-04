@@ -475,6 +475,15 @@ jobs:
           echo "registry=${REGISTRY}" >> $GITHUB_OUTPUT
           echo "ECR Registry: ${REGISTRY}"
 
+      - name: Upload templates to S3
+        run: |
+          BUCKET="${{ secrets.CFN_TEMPLATES_BUCKET }}"
+          BUCKET_REGION=${{ env.CFN_TEMPLATES_REGION }}
+          aws s3 cp templates/aws/s3.template.yaml s3://${BUCKET}/templates/s3.template.yaml --region ${BUCKET_REGION}
+          aws s3 cp templates/aws/vpc.template.yaml s3://${BUCKET}/templates/vpc.template.yaml --region ${BUCKET_REGION}
+          aws s3 cp templates/aws/ecs.template.yaml s3://${BUCKET}/templates/ecs.template.yaml --region ${BUCKET_REGION}
+          echo "Templates uploaded to s3://${BUCKET}/templates/"
+
       - name: Update Main Template with S3 URLs
         run: |
           BUCKET="${{ secrets.CFN_TEMPLATES_BUCKET }}"
